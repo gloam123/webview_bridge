@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:id="@+id/id_url_bar_view"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/toolbar_height">
+        <EditText
+            android:id="@+id/id_url_edit"
+            android:layout_marginTop="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1.0"
+            android:singleLine="true"
+            android:inputType="textUri"
+            android:imeOptions="actionGo" />
+        <ImageButton
+            android:id="@+id/id_go_url"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:src="@mipmap/breadcrumb_arrow_black"
+            android:contentDescription="load url"/>
+    </LinearLayout>
+
+    <com.yiming.wvbridge.view.CustomWebView
+        android:id="@+id/id_webview"
+        android:layout_marginTop="@dimen/toolbar_height"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </com.yiming.wvbridge.view.CustomWebView>
+    <LinearLayout
+        android:id="@+id/id_crash_view"
+        android:visibility="invisible"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:src="@mipmap/webview_crash"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:text="Renderer Process Crashed!"
+            android:textColor="#ff6666"
+            android:layout_marginTop="@dimen/line_margin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/id_crash_reload"
+            android:text="WebView.reload()"
+            android:textAllCaps="false"
+            android:layout_marginTop="@dimen/line_margin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+</FrameLayout>

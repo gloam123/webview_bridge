@@ -1,0 +1,7 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Base.Theme.Yiming" parent="Theme.AppCompat.Light">
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.Yiming" parent="Base.Theme.Yiming" />
+</resources>
