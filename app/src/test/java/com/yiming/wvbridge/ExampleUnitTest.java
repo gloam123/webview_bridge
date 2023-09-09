@@ -1,4 +1,4 @@
-package com.yiming.wvloader;
+package com.yiming.wvbridge;
 
 import org.junit.Test;
 

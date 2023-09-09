@@ -1,13 +1,71 @@
-# In Android WebView, starting from Chromium 88, when the rendering process crashes and recovers, JavaScript calls to Java Bridge interfaces added via addJavascriptInterface may prompt "TypeError: BridgeXXX.methodXXX is not a function."
-### xxxxx
+## Overview
+In Android WebView, starting from Chromium 88, when the rendering process crashes and recovers, JavaScript calls to Java Bridge interfaces added via addJavascriptInterface may prompt "TypeError: BridgeXXX.methodXXX is not a function."
 
+## How to reproduce
+- Define and register the JavaBridge
+```
+  // In MainActivity.java
+  class JavaBridge extends Object {
+    private int mCount = 0;
 
-### cause
+    @JavascriptInterface
+    public String helloJava(String msg) {
+      Toast.makeText(MainActivity.this, "CallJava.helloJava msg=" + msg, Toast.LENGTH_LONG).show();
+      return String.format("Javabridge was called %d times!", ++mCount);
+    }
+  }
+  // register
+  mWebView.addJavascriptInterface(new JavaBridge(), "JavaBridge");
 ```
 
+ - Overload onRenderProcessGone to avoid crashing the main process and display a reload button
+```
+    // In MainActivity.java
+    mWebView.setWebViewClient(new WebViewClient() {
+      @Override
+      public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
+        mCrashView.setVisibility(View.VISIBLE);
+        view.postInvalidate();
+        return true;
+      }
+    });
+```
+ - Call javabridge and display the return results
+```
+  // In index.html
+  function updateBridgeInfo(info, color) {
+    let oInfo = document.getElementById("bridge_info");
+    oInfo.innerHTML = info;
+    if (color) {
+      oInfo.style.color = color;
+    }
+  }
+  
+  var gCallCount = 1;
+  function callJavaBridge() {
+    try {
+      let result = JavaBridge.helloJava("from javascript: call count=" + gCallCount++);
+      updateBridgeInfo(result, '#6d6');
+    } catch (err) {
+      updateBridgeInfo(err, '#d66');
+    }
+  }
 ```
 
-### patch:
+## chromium 119 reproduction demonstration
+Error snapshot | Steps to reproduce
+:-: | :-:
+<img src='https://raw.githubusercontent.com/gloam123/webview_bridge/main/docs/cr119_bug.png' width=290 /> | <video poster='https://raw.githubusercontent.com/gloam123/webview_bridge/main/docs/cr119_bug.png' src='https://github.com/gloam123/webview_bridge/assets/47805211/46f490ee-c80a-4769-aa11-c6d3e4acfdad' />
+
+## chromium 119 fixed demonstration
+Fixed snapshot | Steps to reproduce
+:-: | :-:
+<img src='https://raw.githubusercontent.com/gloam123/webview_bridge/main/docs/cr119_fixed.png' width=290 /> | <video poster='https://raw.githubusercontent.com/gloam123/webview_bridge/main/docs/cr119_fixed.png' src='https://github.com/gloam123/webview_bridge/assets/47805211/3a68d996-84da-48ce-9e2e-5ab6155ea5d0' />
+
+## Detailed reasons
+After the Renderer process crashes and recovers, the main process creates a new RenderFrameHost. However, GinJavaBridgeMessageFilter does not update the 'host_' property to point to the new RenderFrameHost and remove the old one at the appropriate time. When an H5 webpage calls JavaBridge, it tries to find the corresponding RenderFrameHost using the routing_id of the current RenderFrame. At this point, it cannot be found, leading to a JavaScript error: 'TypeError: JavaBridge.helloJava is not a function.'
+
+## Fix patch:
 ```
 ---
  .../java/gin_java_bridge_dispatcher_host.cc   | 37 ++++++++-----------
@@ -117,8 +175,4 @@ index 2e29b17be9865..eba544c67f8f7 100644
    // Run on any thread.
 -- 
 2.25.1
-
 ```
-
-
-

@@ -75,11 +75,8 @@ public class MainActivity extends AppCompatActivity {
   class JavaBridge extends Object {
     private int mCount = 0;
 
-    public JavaBridge() {}
-
     @JavascriptInterface
     public String helloJava(String msg) {
-      Log.e(TAG, "helloJava msg=" + msg);
       Toast.makeText(MainActivity.this, "CallJava.helloJava msg=" + msg, Toast.LENGTH_LONG).show();
       return String.format("Javabridge was called %d times!", ++mCount);
     }
